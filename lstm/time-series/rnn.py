@@ -5,6 +5,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Flatten
 from keras.layers import LSTM, SimpleRNN, Dropout
 from keras.callbacks import LambdaCallback
+from keras import optimizers
 
 import wandb
 from wandb.keras import WandbCallback
@@ -16,7 +17,7 @@ wandb.init()
 config = wandb.config
 
 config.repeated_predictions = True
-config.look_back = 4
+config.look_back = 25  #4
 
 def load_data(data_type="airline"):
     if data_type == "flu":
@@ -54,14 +55,16 @@ test = data[split:]
 trainX, trainY = create_dataset(train)
 testX, testY = create_dataset(test)
 
+print(trainX.shape)
 trainX = trainX[:, :, np.newaxis]
 testX = testX[:, :, np.newaxis]
 
 # create and fit the RNN
 model = Sequential()
-model.add(SimpleRNN(1, input_shape=(config.look_back,1 )))
+model.add(SimpleRNN(4, input_shape=(config.look_back,1 ))) #(4,1) It is setup in the code above. The 1 is the number of  dimensions in output. It's 2 here as I add a Dense layer next. 
+model.add(Dense(1))
 model.compile(loss='mae', optimizer='rmsprop')
-model.fit(trainX, trainY, epochs=1000, batch_size=20, validation_data=(testX, testY),  callbacks=[WandbCallback(), PlotCallback(trainX, trainY, testX, testY, config.look_back)])
+model.fit(trainX, trainY, epochs=1500, batch_size=32, validation_data=(testX, testY),  callbacks=[WandbCallback(), PlotCallback(trainX, trainY, testX, testY, config.look_back)]) ##Even more epochs, a higher learning rate
 
 
 

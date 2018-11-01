@@ -1,0 +1,4 @@
+[default]
+entity: bhavikaj
+project: ml-class
+base_url: https://api.wandb.ai
